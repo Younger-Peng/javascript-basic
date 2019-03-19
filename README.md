@@ -1,3 +1,3 @@
 # JavaScript Basic
 
-[console]https://younger-peng.github.io/javascript-basic/console/index.html)
+[console](https://younger-peng.github.io/javascript-basic/console/index.html)
