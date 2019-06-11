@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="preload" as="image" href="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png">
+</head>
+<body>
+    <div id="parent">
+        <div id="child">child</div>
+    </div>
+</body>
+<script>
+    window.addEventListener('click', e => {
+      console.log('window clicked')
+    }, true)
+
+    parent.addEventListener('click', e => {
+      console.log('parent clicked in capture')
+    }, true)
+
+    parent.addEventListener('click', e => {
+      console.log('parent clicked in pop')
+    }, false)
+
+    child.addEventListener('click', e => {
+      console.log('child clicked in capture')
+    }, true)
+
+    child.addEventListener('click', e => {
+      console.log('child clicked in pop')
+    }, false)
+
+    function appendImg() {
+      const image = new Image()
+      image.src = 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png'
+      document.body.appendChild(image)
+    }
+
+
+    window.onload = () => {
+      appendImg()
+    }
+    
+</script>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        WeakMap
+    </title>
+</head>
+<body>
+    <script>
+        const wm = new WeakMap()
+        let key = new Array(5 * 1024 * 1024)
+        let val = new Array(5 * 1024 * 1025)
+        wm.set(key, val)
+        setTimeout(() => {
+            key = null
+            val = null
+        }, 3000)
+    </script>
+</body>
+</html>

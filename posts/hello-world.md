@@ -16,11 +16,10 @@ JavaScript 程序可以使用 <script> 标签插入到 HTML 的任何地方。
         <title>Hello World</title>
     </head>
     <body>
-        <p>script 标签之前...</p>
+        <p>Hi, how are you?</p>
         <script>
             console.log('Hello, world!');
         </script>
-        <p>...script 标签之后</p>
     </body>
 </html>
 
@@ -36,5 +35,25 @@ JavaScript 程序可以使用 <script> 标签插入到 HTML 的任何地方。
 
 
 ```
-<script src="/path/to/script.js"></script>
+<script src="/path/to/index.js"></script>
 ```
+
+这里，/path/to/index.js 是脚本文件的绝对路径（从站点根目录开始）。
+
+也可以提供相对于当前页面的相对路径。比如，src="index.js" 意思是来自当前文件夹（及index.html 文件所在的文件夹）的 "index.js" 文件。
+
+我们还可以提供一个完整的 URL 地址，例如：
+
+```
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+```
+
+## script 标签不能既设置了 src 属性，又添加了标签内容，如果两者同时存在，则标签内容将会被忽略。
+如下代码不会再控制台打印出 “hello，world”
+
+```
+<script src="index.js">
+    console.log('Hello, world'); // 由于设置了 src 属性，该段代码不会被执行
+</script>
+```
+
