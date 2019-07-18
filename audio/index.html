@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <script src="https://cdn.bootcss.com/vConsole/3.3.2/vconsole.min.js"></script>
+    <script type="text/javascript">
+        new VConsole()
+    </script>
+    <style type="text/css">
+        #content {
+            height: 50px;
+        }
+        #db {
+            height: 50px;
+        }
+        #recordBtn {
+            height: 50px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="content" class="">吹</div>
+    <div id="db">音量：0</div>
+    <button id="recordBtn">按下开始吹气</button>
+
+    <script>
+        if (navigator.mediaDevices === undefined) {
+            content.innerText = content.innerText + 'navigator.mediaDevices === undefined\n'
+            navigator.mediaDevices = {};
+        }
+
+        // 一些浏览器部分支持 mediaDevices。我们不能直接给对象设置 getUserMedia 
+        // 因为这样可能会覆盖已有的属性。这里我们只会在没有getUserMedia属性的时候添加它。
+        if (navigator.mediaDevices.getUserMedia === undefined) {
+            content.innerText = content.innerText + 'navigator.mediaDevices.getUserMedia === undefined\n'
+            navigator.mediaDevices.getUserMedia = function(constraints) {
+
+            // 首先，如果有getUserMedia的话，就获得它
+            var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia
+
+            content.innerText = content.innerText + 'getUserMedia still is undefined\n'
+
+            // 一些浏览器根本没实现它 - 那么就返回一个error到promise的reject来保持一个统一的接口
+            if (!getUserMedia) {
+                return Promise.reject(new Error('_getUserMedia_ is not implemented in this browser'));
+            }
+
+            // 否则，为老的navigator.getUserMedia方法包裹一个Promise
+            return new Promise(function(resolve, reject) {
+                getUserMedia.call(navigator, constraints, resolve, reject);
+            });
+          }
+        }
+
+        let isPressing = false;
+        recordBtn.addEventListener('click', () => {
+            isPressing = !isPressing;
+        });
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                const context = new window.AudioContext(); // 创建管理、播放声音的对象
+
+                const mediaSource = context.createMediaStreamSource(stream) // 将麦克风的声音输入该对象
+                const processor = context.createScriptProcessor(16384, 1, 1);
+                mediaSource.connect(processor); //将该分析对象与麦克风音频进行连接
+
+                processor.connect(context.destination)
+
+                processor.onaudioprocess = function(e) { //开始处理音频
+                    if (!isPressing) return;
+
+                    var buffer = e.inputBuffer.getChannelData(0); //获得缓冲区的输入音频，转换为包含了PCM通道数据的32位浮点数组
+                    //创建变量并迭代来获取最大的音量值
+
+                    var maxVal = 0; 
+                    for (var i = 0; i < buffer.length; i++) {
+                        if (maxVal < buffer[i]) {
+                            maxVal = buffer[i];
+                        }
+                    }
+
+                    //显示音量值
+                    db.innerHTML = "音量："+Math.round(maxVal*100);
+                };
+
+            })
+            .catch(error => {
+                console.log(error)
+                console.log(error.name)
+                console.log(error.message)
+            })
+    </script>
+
+</body>
+</html>

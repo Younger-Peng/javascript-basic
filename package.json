@@ -1,0 +1,23 @@
+{
+  "name": "javascript-basic",
+  "version": "1.0.0",
+  "description": "[Console](https://younger-peng.github.io/javascript-basic/console/index.html)\r [Statistics](https://younger-peng.github.io/javascript-basic/stat/index.html)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "copy": "git+ssh://git@gitlab.bitautotech.com:pengyang1/easy-copy.git",
+    "express": "^4.17.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Younger-Peng/javascript-basic.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Younger-Peng/javascript-basic/issues"
+  },
+  "homepage": "https://github.com/Younger-Peng/javascript-basic#readme"
+}

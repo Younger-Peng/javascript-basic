@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <script src="https://cdn.bootcss.com/vConsole/3.3.2/vconsole.min.js"></script>
+    <script type="text/javascript">
+        new VConsole()
+    </script>
+</head>
+<body>
+    <div id="mystatus">100</div>
+    <div id="se">0.79797878</div>
+    <script type="text/javascript">
+        // 老的浏览器可能根本没有实现 mediaDevices，所以我们可以先设置一个空的对象
+        if (navigator.mediaDevices === undefined) {
+            content.innerText = content.innerText + 'navigator.mediaDevices === undefined\n'
+          navigator.mediaDevices = {};
+        }
+
+        // 一些浏览器部分支持 mediaDevices。我们不能直接给对象设置 getUserMedia 
+        // 因为这样可能会覆盖已有的属性。这里我们只会在没有getUserMedia属性的时候添加它。
+        if (navigator.mediaDevices.getUserMedia === undefined) {
+            content.innerText = content.innerText + 'navigator.mediaDevices.getUserMedia === undefined\n'
+          navigator.mediaDevices.getUserMedia = function(constraints) {
+
+            // 首先，如果有getUserMedia的话，就获得它
+            var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia
+
+            content.innerText = content.innerText + 'getUserMedia still is undefined\n'
+
+            // 一些浏览器根本没实现它 - 那么就返回一个error到promise的reject来保持一个统一的接口
+            if (!getUserMedia) {
+              return Promise.reject(new Error('_getUserMedia_ is not implemented in this browser'));
+            }
+
+            // 否则，为老的navigator.getUserMedia方法包裹一个Promise
+            return new Promise(function(resolve, reject) {
+              getUserMedia.call(navigator, constraints, resolve, reject);
+            });
+          }
+        }
+       
+
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(onSuccess)
+            .catch(onError)
+
+        function onError(error) {
+            console.log(error)
+            mystatus.innerHTML = '获取音频时好像出了点问题。'
+        }
+
+        /**
+         * [onSuccess description]
+         * @param  {[type]} stream [description]
+         * @return {[type]}        [description]
+         * 1. audioContext
+         * 2. audioContext.createMediaStreamSource
+         * 3. createScriptProcessor 音频分析对象
+         * 4. 设置音频分析的输入输出为单声道
+         * 5. connect
+         * 7. 遍历
+         * 8. 判断
+         */
+        function onSuccess(stream) {
+            se.innerText = se.innerText + 'on success'
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            const context = new AudioContext(); // 创建管理、播放声音的对象
+            const liveSource = context.createMediaStreamSource(stream) // 将麦克风的声音输入该对象
+            const levelChecker = context.createScriptProcessor(4096, 1, 1);
+            liveSource.connect(levelChecker); //将该分析对象与麦克风音频进行连接
+
+
+            levelChecker.onaudioprocess = function(e) { //开始处理音频
+                se.innerText = se.innerText + 'on audio process'
+                var buffer = e.inputBuffer.getChannelData(0); //获得缓冲区的输入音频，转换为包含了PCM通道数据的32位浮点数组
+                //创建变量并迭代来获取最大的音量值
+                var maxVal = 0; 
+                for (var i = 0; i < buffer.length; i++) {
+                    if (maxVal < buffer[i]) {
+                        maxVal = buffer[i];
+                    }
+                }
+
+                //显示音量值
+                mystatus.innerHTML = "您的音量值："+Math.round(maxVal*100);
+                if(maxVal>.5){
+                    //当音量值大于0.5时，显示“声音太响”字样，并断开音频连接
+                    mystatus.innerHTML = "您的声音太响了!!";
+                    liveSource.disconnect(levelChecker);
+                }
+            };
+        }
+
+    </script>
+</body>
+</html>
